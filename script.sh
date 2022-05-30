@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
+initial=0
+finish=0
 index=0
 address=0
 range=0
 version="1.0"
 regex_netid="\b([0-9]{1,3}\.){3}$"
-regex_range="[0-9]\.\.[0-9]"
+regex_range="[0-9]-[0-9]"
 help="this script is a simple host discovery with ping sweep"
 
 ip_is_valid(){
 	if [[ $1 =~ $regex_netid ]]
 	then
 		 return 0
-	elif [[ $1 -eq 0 ]]
+	elif [ $1 -eq 0 ]
 	then
 		 echo $help && exit 0	
 	else
@@ -48,7 +50,19 @@ else
 	range_is_valid $range
 	if [[ $? -eq 0 ]]
 	then
-		echo "scanning that shit"
+		initial=$(echo $range | cut -f1 -d"-")
+		finish=$(echo $range | cut -f2 -d"-")
+		echo starting in $initial
+		echo ending in $finish
+		while [ $initial -ne $finish ]; do
+			$(ping -c 1 $address$initial >> /dev/null)
+			if [ $? -eq 0 ]
+			then
+				echo "$address$initial is active!"
+			fi
+
+			initial=$((initial+1))
+		done
 	else
 		echo "scanning that shit in 254 hosts"
 	fi
