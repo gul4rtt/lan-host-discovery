@@ -8,7 +8,22 @@ range=0
 version="1.0"
 regex_netid="\b([0-9]{1,3}\.){3}$"
 regex_range="[0-9]-[0-9]"
-help="this script is a simple host discovery with ping sweep"
+help="
+this script is a simple host discovery with ping sweep
+
+-ni | use this parameter to inform the net id, example:
+
+bash script.sh -ni 192.168.1.
+
+--------------------------------------------------------------
+
+-r | use this parameter to set a range of hosts, example:
+
+bash script.sh -ni 192.168.1. -r 3-20
+
+if this parameter is not informed, a complete scan will be performed
+
+"
 
 ping_sweep(){
 	$(ping -c 1 $1$2 >> /dev/null)
@@ -24,11 +39,8 @@ ip_is_valid(){
 	if [[ $1 =~ $regex_netid ]]
 	then
 		 return 0
-	elif [ $1 -eq 0 ]
-	then
-		 echo $help && exit 0	
 	else
-		 return 1
+		 return 1	
 	fi
 }
 
@@ -44,7 +56,7 @@ range_is_valid(){
 while test -n "$1"
 do
 	case "$1" in 
-		-h) echo $help && exit 0;;
+		-h) echo "$help" && exit 0;;
 		-v) echo $version && exit 0;;
 		-ni) address=$2;;
 	    -r) range=$2;;
