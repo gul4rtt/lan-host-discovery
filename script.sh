@@ -10,6 +10,16 @@ regex_netid="\b([0-9]{1,3}\.){3}$"
 regex_range="[0-9]-[0-9]"
 help="this script is a simple host discovery with ping sweep"
 
+ping_sweep(){
+	$(ping -c 1 $1$2 >> /dev/null)
+	if [ $? -eq 0 ]
+	then
+		echo "$1$2 is active!"
+	else
+		echo "$1$2 is not active!"
+	fi
+}
+
 ip_is_valid(){
 	if [[ $1 =~ $regex_netid ]]
 	then
@@ -36,7 +46,7 @@ do
 	case "$1" in 
 		-h) echo $help && exit 0;;
 		-v) echo $version && exit 0;;
-		-i) address=$2;;
+		-ni) address=$2;;
 	    -r) range=$2;;
 	esac
 shift
@@ -54,16 +64,17 @@ else
 		finish=$(echo $range | cut -f2 -d"-")
 		echo starting in $initial
 		echo ending in $finish
-		while [ $initial -ne $finish ]; do
-			$(ping -c 1 $address$initial >> /dev/null)
-			if [ $? -eq 0 ]
-			then
-				echo "$address$initial is active!"
-			fi
-
+		while [ $initial -le $finish ]; do
+			ping_sweep $address $initial	
 			initial=$((initial+1))
 		done
 	else
-		echo "scanning that shit in 254 hosts"
+		initial=1
+		echo starting in $initial
+		echo ending ing 254
+		while [ $initial -le 254 ]; do
+			ping_sweep $address $initial
+			initial=$((initial+1))
+		done
 	fi
 fi
